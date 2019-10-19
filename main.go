@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 // Error to be reported to the user
@@ -42,6 +44,15 @@ type HitlistEntry struct {
 	Nick     string `json:"nick"`
 	Position int    `json:"position"`
 	Value    string `json:"value"`
+}
+
+// LiveChartEntry represents an entry in the production/consumption chart.
+type LiveChartEntry struct {
+	Date            time.Time `json:"date"`
+	UserConsumption int       `json:"userConsumption"`
+	GroupConsumtion int       `json:"groupConsumption"`
+	GroupProduction int       `json:"groupProduction"`
+	SelfSufficiency int       `json:"selfSufficiency"`
 }
 
 // MaxValuesHistory tells how many history values can be requested at once
@@ -235,6 +246,26 @@ func main() {
 		}
 
 		c.JSON(200, gin.H{})
+	})
+
+	route.GET("/live", func(c *gin.Context) {
+		var wsupgrader = websocket.Upgrader{
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+		}
+
+		conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
+		if err != nil {
+			fmt.Println("Failed to create websocket")
+			return
+		}
+
+		e := LiveChartEntry{time.Now(), rand.Int() % 10, rand.Int() % 100, rand.Int() % 10, rand.Int() % 100}
+		for {
+			e = LiveChartEntry{time.Now(), e.UserConsumption + rand.Int()%10, e.GroupConsumtion + rand.Int()%100, e.GroupProduction + rand.Int()%100, rand.Int() % 100}
+			conn.WriteJSON(e)
+			time.Sleep(1000000000)
+		}
 	})
 
 	route.Run(":8088")
