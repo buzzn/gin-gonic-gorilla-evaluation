@@ -46,13 +46,21 @@ type HitlistEntry struct {
 	Value    string `json:"value"`
 }
 
+// LiveChartConsumer represents a consumer.
+type LiveChartConsumer struct {
+	Icon  string `json:"icon"`
+	Title string `json:"title"`
+}
+
 // LiveChartEntry represents an entry in the production/consumption chart.
 type LiveChartEntry struct {
-	Date            time.Time `json:"date"`
-	UserConsumption int       `json:"userConsumption"`
-	GroupConsumtion int       `json:"groupConsumption"`
-	GroupProduction int       `json:"groupProduction"`
-	SelfSufficiency int       `json:"selfSufficiency"`
+	Date            time.Time           `json:"date"`
+	UserConsumption int                 `json:"userConsumption"`
+	GroupConsumtion int                 `json:"groupConsumption"`
+	GroupProduction int                 `json:"groupProduction"`
+	SelfSufficiency int                 `json:"selfSufficiency"`
+	UserConsumers   []LiveChartConsumer `json:"userConsumers"`
+	groupConsumers  []LiveChartConsumer `json:"groupConsumers"`
 }
 
 // MaxValuesHistory tells how many history values can be requested at once
@@ -259,10 +267,10 @@ func main() {
 			fmt.Println("Failed to create websocket")
 			return
 		}
-
-		e := LiveChartEntry{time.Now(), rand.Int() % 10, rand.Int() % 100, rand.Int() % 10, rand.Int() % 100}
+		users := []LiveChartConsumer{LiveChartConsumer{"i1", "Consumer one"}, LiveChartConsumer{"i2", "Consumer one"}}
+		e := LiveChartEntry{time.Now(), rand.Int() % 10, rand.Int() % 100, rand.Int() % 10, rand.Int() % 100, users, users}
 		for {
-			e = LiveChartEntry{time.Now(), e.UserConsumption + rand.Int()%10, e.GroupConsumtion + rand.Int()%100, e.GroupProduction + rand.Int()%100, rand.Int() % 100}
+			e = LiveChartEntry{time.Now(), e.UserConsumption + rand.Int()%10, e.GroupConsumtion + rand.Int()%100, e.GroupProduction + rand.Int()%100, rand.Int() % 100, users, users}
 			conn.WriteJSON(e)
 			time.Sleep(1000000000)
 		}
