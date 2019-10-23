@@ -15,8 +15,8 @@ go run main.go
 ## How to use 
 This implemention runs a http-server at port 8088. To get the hitlist type:
 ```
-curl http://localhost/8088/hitlist
+curl http://localhost/8088:hitlist
 ```
 
-To get the live data: Read from websocket `ws://localhost/8088/live`
+To get the live data: Read from websocket `ws://localhost:8088/live`
 
